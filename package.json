@@ -1,0 +1,34 @@
+{
+  "name": "asana-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon v1/src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/deKadir/asana-backend.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/deKadir/asana-backend/issues"
+  },
+  "homepage": "https://github.com/deKadir/asana-backend#readme",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "crypto-js": "^4.1.1",
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "helmet": "^5.1.0",
+    "http-status": "^1.5.2",
+    "joi": "^17.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "mongoose": "^6.4.1",
+    "nodemon": "^2.0.18",
+    "winston": "^3.8.0"
+  }
+}
