@@ -7,6 +7,8 @@ const ProjectSchema = mongoose.Schema(
     user_id: {
       type: mongoose.Types.ObjectId,
       ref: 'User',
+      required: true,
+      select: true,
     },
   },
   { versionKey: false, timestamps: true }

@@ -9,8 +9,9 @@ const UserSchema = mongoose.Schema(
   },
   { timestamps: true, versionKey: false }
 );
-UserSchema.pre('save', function () {
-  const hashedPassword = passwordToHash(this.password);
-  this.password = hashedPassword;
-});
+// UserSchema.pre('save', async function (next) {
+//   const hashedPassword = passwordToHash(this.password);
+//   this.password = hashedPassword;
+// });
+
 export default mongoose.model('User', UserSchema);

@@ -12,7 +12,7 @@ const authenticateToken = (req, res, next) => {
       return res
         .status(httpStatus.FORBIDDEN)
         .send({ success: false, message: 'Token expired' });
-    req.user = user.data;
+    req.user = user.userId;
     return next();
   });
 };

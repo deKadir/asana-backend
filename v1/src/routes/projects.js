@@ -1,9 +1,14 @@
 import { Router } from 'express';
-import { create, listProjects } from '../controllers/projectController.js';
+import { create, updateProject } from '../controllers/projectController.js';
 import validate from '../middlewares/validate.js';
-import { createValidation } from '../validations/Project.js';
+import { createValidation, updateValidation } from '../validations/Project.js';
 import authenticateToken from './../middlewares/authenticate.js';
 const router = Router();
 router.post('/create', validate(createValidation), authenticateToken, create);
-router.get('/list', listProjects);
+router.patch(
+  '/update/:id',
+  validate(updateValidation),
+  authenticateToken,
+  updateProject
+);
 export default router;

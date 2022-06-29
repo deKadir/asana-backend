@@ -10,4 +10,7 @@ const loginValidation = joi.object({
   password: joi.string().required().min(8),
   email: joi.string().email().required(),
 });
-export { createValidation, loginValidation };
+const resetValidation = joi.object({
+  email: joi.string().email().required(),
+});
+export { createValidation, loginValidation, resetValidation };

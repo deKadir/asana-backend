@@ -1,16 +1,24 @@
 import httpStatus from 'http-status';
-import { passwordToHash } from '../scripts/helpers/crypto.js';
+import * as uuid from 'uuid';
+
 import {
   generateAccessToken,
   generateRefreshToken,
 } from '../scripts/helpers/token.js';
-import { insert, list, login } from '../services/userService.js';
+import { passwordToHash } from '../scripts/helpers/crypto.js';
+import { insert, login, modify } from '../services/userService.js';
+import * as projectController from '../services/projectService.js';
+
 const create = async (req, res, next) => {
   insert(req.body)
     .then((data) => {
       res.status(httpStatus.CREATED).send(data);
     })
-    .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e.message));
+    .catch((e) =>
+      res
+        .status(httpStatus.INTERNAL_SERVER_ERROR)
+        .send({ message: e.message || 'An error occured' })
+    );
 };
 
 const userLogin = async (req, res, next) => {
@@ -39,4 +47,39 @@ const userLogin = async (req, res, next) => {
       });
     });
 };
-export { create, userLogin };
+const listProjects = async (req, res, next) => {
+  projectController
+    .list({ user_id: req.user })
+    .then((data) => res.status(httpStatus.OK).send(data))
+    .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
+};
+
+const resetPassword = async (req, res, next) => {
+  const newPassword = uuid.v4()?.split('-')[0];
+  console.log(newPassword);
+  modify(req.body, { password: newPassword })
+    .then((data) => {
+      if (!data)
+        return res
+          .status(httpStatus.NOT_FOUND)
+          .send({ message: 'User not found' });
+
+      //send mail
+      res
+        .status(httpStatus.OK)
+        .send({ message: 'Your password has been sent to your mail address' });
+    })
+    .catch((e) =>
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message })
+    );
+};
+const update = (req, res, next) => {
+  modify({ _id: req.user }, req.body)
+    .then((updated) => {
+      res.status(httpStatus.OK).send(updated);
+    })
+    .catch((e) =>
+      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message })
+    );
+};
+export { create, userLogin, listProjects, resetPassword, update };
