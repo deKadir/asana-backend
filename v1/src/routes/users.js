@@ -5,6 +5,7 @@ import {
   listProjects,
   resetPassword,
   update,
+  updateProfileImage,
 } from '../controllers/userController.js';
 import validate from '../middlewares/validate.js';
 import {
@@ -19,4 +20,5 @@ router.post('/login', validate(loginValidation), userLogin);
 router.get('/projects', authenticateToken, listProjects);
 router.post('/reset-password', validate(resetValidation), resetPassword);
 router.patch('/update', authenticateToken, update);
+router.post('/update-profile-image', authenticateToken, updateProfileImage);
 export default router;

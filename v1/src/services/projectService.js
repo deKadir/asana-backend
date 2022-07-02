@@ -6,11 +6,13 @@ const insert = (projectData) => {
 const list = (where) => {
   return Project.find(where || {}).populate({
     path: 'user_id',
-    select: 'fullName email',
+    select: 'fullName email profileImage',
   });
 };
 const modify = (id, data) => {
   return Project.findByIdAndUpdate(id, data, { new: true });
 };
-
-export { insert, list, modify };
+const removeProject = (where) => {
+  return Project.findOneAndDelete(where);
+};
+export { insert, list, modify, removeProject };

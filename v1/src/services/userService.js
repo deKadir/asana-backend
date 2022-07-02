@@ -17,4 +17,5 @@ const modify = (where, data) => {
   }
   return User.findOneAndUpdate(where, data, { new: true });
 };
+
 export { insert, list, login, modify };

@@ -1,5 +1,6 @@
 import httpStatus from 'http-status';
 import * as uuid from 'uuid';
+import path from 'path';
 
 import {
   generateAccessToken,
@@ -82,4 +83,45 @@ const update = (req, res, next) => {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message })
     );
 };
-export { create, userLogin, listProjects, resetPassword, update };
+const updateProfileImage = (req, res, next) => {
+  const extension = path.extname(req.files.profileImage.name);
+  const fileName = `${req.user}${extension}`;
+  const folderPath = path.join(
+    path.resolve(),
+    '/v1/src/uploads/users',
+    fileName
+  );
+  console.log(folderPath);
+  if (!req.files?.profileImage)
+    return res
+      .status(httpStatus.BAD_REQUEST)
+      .send({ message: 'Please provide profileImage' });
+
+  req.files.profileImage.mv(folderPath, function (err) {
+    if (err) {
+      return res
+        .status(httpStatus.INTERNAL_SERVER_ERROR)
+        .send({ message: err.message });
+    }
+    modify({ _id: req.user }, { profileImage: fileName })
+      .then((result) => {
+        return res
+          .status(httpStatus.OK)
+          .send({ message: 'Image successfully uploaded' });
+      })
+      .catch((e) =>
+        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
+          message: e.message,
+        })
+      );
+  });
+};
+
+export {
+  create,
+  userLogin,
+  listProjects,
+  resetPassword,
+  update,
+  updateProfileImage,
+};

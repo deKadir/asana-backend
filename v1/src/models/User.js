@@ -4,14 +4,14 @@ const UserSchema = mongoose.Schema(
   {
     fullName: String,
     password: String,
-    email: String,
+    email: { type: String, unique: true },
     profileImage: String,
   },
   { timestamps: true, versionKey: false }
 );
-// UserSchema.pre('save', async function (next) {
-//   const hashedPassword = passwordToHash(this.password);
-//   this.password = hashedPassword;
-// });
+UserSchema.pre('save', async function (next) {
+  const hashedPassword = passwordToHash(this.password);
+  this.password = hashedPassword;
+});
 
 export default mongoose.model('User', UserSchema);

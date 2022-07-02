@@ -1,5 +1,10 @@
 import httpStatus from 'http-status';
-import { insert, modify, removeProject } from '../services/projectService.js';
+import {
+  insert,
+  modify,
+  removeSection,
+  list,
+} from '../services/sectionService.js';
 
 const create = async (req, res, next) => {
   req.body.user_id = req.user;
@@ -9,11 +14,11 @@ const create = async (req, res, next) => {
     })
     .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e.message));
 };
-const updateProject = (req, res, next) => {
+const updateSection = (req, res, next) => {
   // authorization not implemented
   if (!req.params.id)
     return res.status(httpStatus.BAD_REQUEST).send({
-      message: 'Project id is required',
+      message: 'Section id is required',
     });
   modify(req.params.id, req.body)
     .then((data) => {
@@ -28,17 +33,23 @@ const remove = (req, res, next) => {
   if (!req.params.id)
     return res
       .status(httpStatus.BAD_REQUEST)
-      .send({ message: 'Project id not provided' });
-  removeProject({ _id: req.params.id, user_id: req.user })
+      .send({ message: 'Section id not provided' });
+  removeSection({ _id: req.params.id, user_id: req.user })
     .then((del) => {
       if (!del)
         return res
           .status(httpStatus.NOT_FOUND)
-          .send({ message: 'Project not found' });
+          .send({ message: 'Section not found' });
       res.status(httpStatus.OK).send(del);
     })
     .catch((e) => {
       res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message });
     });
 };
-export { create, updateProject, remove };
+
+const listSections = (req, res, next) => {
+  list({ user_id: req.user })
+    .then((data) => res.status(httpStatus.OK).send(data))
+    .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
+};
+export { create, updateSection, remove, listSections };
