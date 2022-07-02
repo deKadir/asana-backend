@@ -6,7 +6,7 @@ import loaders from './loaders/index.js';
 import fileupload from 'express-fileupload';
 
 import routes from './routes/index.js';
-
+import errorHandler from './middlewares/errorHandler.js';
 const app = express();
 
 app.use(express.json());
@@ -19,6 +19,12 @@ app.use(
 );
 app.use(fileupload());
 app.use('/api/v1', routes);
+app.use((req, res, next) => {
+  const error = new Error('invalid request');
+  next(error);
+});
+
+app.use(errorHandler);
 
 loaders();
 
