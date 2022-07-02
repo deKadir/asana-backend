@@ -1,4 +1,5 @@
 import { Project } from '../models/index.js';
+
 const insert = (projectData) => {
   const project = new Project(projectData);
   return project.save();

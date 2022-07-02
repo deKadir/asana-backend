@@ -9,17 +9,14 @@ import {
 import { passwordToHash } from '../scripts/helpers/crypto.js';
 import { insert, login, modify } from '../services/userService.js';
 import * as projectController from '../services/projectService.js';
+import CustomError from '../scripts/helpers/CustomError.js';
 
 const create = async (req, res, next) => {
   insert(req.body)
     .then((data) => {
       res.status(httpStatus.CREATED).send(data);
     })
-    .catch((e) =>
-      res
-        .status(httpStatus.INTERNAL_SERVER_ERROR)
-        .send({ message: e.message || 'An error occured' })
-    );
+    .catch((e) => next(CustomError(e.message)));
 };
 
 const userLogin = async (req, res, next) => {
@@ -27,9 +24,8 @@ const userLogin = async (req, res, next) => {
   login(req.body)
     .then((user) => {
       if (!user)
-        return res
-          .status(httpStatus.NOT_FOUND)
-          .json({ success: false, message: 'User not found' });
+        return next(CustomError('User not found', httpStatus.NOT_FOUND));
+
       if (user.password === req.body.password) {
         return res.status(httpStatus.OK).send({
           success: true,
@@ -39,20 +35,15 @@ const userLogin = async (req, res, next) => {
           },
         });
       }
-      res.status(403).send('Password is wrong');
+      return next(CustomError('Wrong password', 403));
     })
-    .catch((e) => {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).json({
-        success: false,
-        message: e.message,
-      });
-    });
+    .catch((e) => next(CustomError(e.message)));
 };
 const listProjects = async (req, res, next) => {
   projectController
     .list({ user_id: req.user })
     .then((data) => res.status(httpStatus.OK).send(data))
-    .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e));
+    .catch((e) => next(CustomError(e.message)));
 };
 
 const resetPassword = async (req, res, next) => {
@@ -61,27 +52,20 @@ const resetPassword = async (req, res, next) => {
   modify(req.body, { password: newPassword })
     .then((data) => {
       if (!data)
-        return res
-          .status(httpStatus.NOT_FOUND)
-          .send({ message: 'User not found' });
-
+        return next(CustomError('User not found', httpStatus.NOT_FOUND));
       //send mail
       res
         .status(httpStatus.OK)
         .send({ message: 'Your password has been sent to your mail address' });
     })
-    .catch((e) =>
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message })
-    );
+    .catch((e) => next(CustomError(e.message)));
 };
 const update = (req, res, next) => {
   modify({ _id: req.user }, req.body)
     .then((updated) => {
       res.status(httpStatus.OK).send(updated);
     })
-    .catch((e) =>
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message })
-    );
+    .catch((e) => next(CustomError(e.message)));
 };
 const updateProfileImage = (req, res, next) => {
   const extension = path.extname(req.files.profileImage.name);
@@ -93,9 +77,9 @@ const updateProfileImage = (req, res, next) => {
   );
   console.log(folderPath);
   if (!req.files?.profileImage)
-    return res
-      .status(httpStatus.BAD_REQUEST)
-      .send({ message: 'Please provide profileImage' });
+    return next(
+      CustomError('Please provide profileImage', httpStatus.BAD_REQUEST)
+    );
 
   req.files.profileImage.mv(folderPath, function (err) {
     if (err) {
@@ -109,11 +93,7 @@ const updateProfileImage = (req, res, next) => {
           .status(httpStatus.OK)
           .send({ message: 'Image successfully uploaded' });
       })
-      .catch((e) =>
-        res.status(httpStatus.INTERNAL_SERVER_ERROR).send({
-          message: e.message,
-        })
-      );
+      .catch((e) => next(CustomError(e.message)));
   });
 };
 

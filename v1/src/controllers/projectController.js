@@ -1,5 +1,7 @@
 import httpStatus from 'http-status';
+
 import { insert, modify, removeProject } from '../services/projectService.js';
+import CustomError from '../scripts/helpers/CustomError.js';
 
 const create = async (req, res, next) => {
   req.body.user_id = req.user;
@@ -7,38 +9,31 @@ const create = async (req, res, next) => {
     .then((data) => {
       res.status(httpStatus.CREATED).send(data);
     })
-    .catch((e) => res.status(httpStatus.INTERNAL_SERVER_ERROR).send(e.message));
+    .catch((e) => next(CustomError(e.message)));
 };
 const updateProject = (req, res, next) => {
   // authorization not implemented
   if (!req.params.id)
-    return res.status(httpStatus.BAD_REQUEST).send({
-      message: 'Project id is required',
-    });
+    return next(CustomError('project_id is required'), httpStatus.BAD_REQUEST);
   modify(req.params.id, req.body)
     .then((data) => {
+      if (!data)
+        return next(CustomError('Project not found'), httpStatus.NOT_FOUND);
       res.status(httpStatus.OK).send(data);
     })
-    .catch((e) =>
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message })
-    );
+    .catch((e) => next(CustomError(e.message)));
 };
 const remove = (req, res, next) => {
   //authorization not implemented
   if (!req.params.id)
-    return res
-      .status(httpStatus.BAD_REQUEST)
-      .send({ message: 'Project id not provided' });
+    return next(CustomError('project_id is required'), httpStatus.BAD_REQUEST);
+
   removeProject({ _id: req.params.id, user_id: req.user })
     .then((del) => {
       if (!del)
-        return res
-          .status(httpStatus.NOT_FOUND)
-          .send({ message: 'Project not found' });
-      res.status(httpStatus.OK).send(del);
+        return next(CustomError('Project not found'), httpStatus.NOT_FOUND);
+      res.status(httpStatus.OK).json(del);
     })
-    .catch((e) => {
-      res.status(httpStatus.INTERNAL_SERVER_ERROR).send({ message: e.message });
-    });
+    .catch((e) => next(CustomError(e.message)));
 };
 export { create, updateProject, remove };
